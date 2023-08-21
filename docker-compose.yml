@@ -2,17 +2,28 @@ version: '3.8'
 
 services:
   web:
-    container_name: web_prod
-    build: ./app
+    image: samogonn/django_deploy:v2
     command: gunicorn project.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
+    environment:
+      - DEBUG=0
+      - SECRET_KEY=foo
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=postgres
+      - SQL_USER=postgres
+      - SQL_PASSWORD=postgres
+      - SQL_HOST=db
+      - SQL_PORT=5432
+      - DATABASE=postgres
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@gmail.com
+      - DJANGO_SUPERUSER_PASSWORD=admin
     expose:
       - 8000
     ports:
       - 8000:8000
-    env_file:
-      - ./.env
     depends_on:
       - db
   db:
@@ -24,8 +35,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
   nginx:
-    container_name: nginx_prod
-    build: ./nginx
+    image: samogonn/nginx_deploy
     volumes:
       - static_volume:/home/app/web/staticfiles
     expose:
